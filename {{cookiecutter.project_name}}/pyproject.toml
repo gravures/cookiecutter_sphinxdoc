@@ -1,0 +1,6 @@
+{% extends "sphinxdoc" %}
+
+[project.optional-dependencies]
+{% block toml_optional_dependencies -%}
+    {{ super()}}
+{%- endblock %}

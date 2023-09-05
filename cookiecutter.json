@@ -1,0 +1,13 @@
+{
+    "project_name": "MyProject",
+    "_copy_without_render": [
+        "docs/sources/**/*.rst"
+    ],
+    "_public": [
+        "project_name"
+    ],
+    "__cwd": "{{ cwd() }}",
+    "__prompts__": {
+        "project_name": "pyproject-package name"
+    }
+}

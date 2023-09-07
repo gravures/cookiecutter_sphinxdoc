@@ -1,13 +1,8 @@
 {
     "project_name": "MyProject",
+    "package_name": "{{ cookiecutter.project_name|lower|replace('-', '_')|replace(' ', '_') }}",
+    "short_description": "A cookiecutter template for sphinx documentation.",
     "_copy_without_render": [
         "docs/sources/**/*.rst"
-    ],
-    "_public": [
-        "project_name"
-    ],
-    "__cwd": "{{ cwd() }}",
-    "__prompts__": {
-        "project_name": "pyproject-package name"
-    }
+    ]
 }

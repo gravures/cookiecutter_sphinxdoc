@@ -1,45 +1,61 @@
-# Configuration file for the Sphinx documentation builder.
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
-# https://bylr.info/articles/2022/05/10/api-doc-with-sphinx-autoapi/
-import os
-import sys
+"""Configuration file for the Sphinx documentation builder.
 
-import toml
+https://www.sphinx-doc.org/en/master/usage/configuration.html
+https://bylr.info/articles/2022/05/10/api-doc-with-sphinx-autoapi/
+"""
+
+import contextlib
+import sys
+from pathlib import Path
+
+from pip._vendor import tomli
 
 # PATH SETUP
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath("../../src"))
+sys.path.insert(0, str(Path("../../src").resolve()))
 
-# PROJECT INFORMATION FROM pyproject.toml
-version = "unset"
-try:
+# VERSIONS HANDLING
+version = "unknown"
+with contextlib.suppress(OSError):
     # we can´t read dynamic variable from pyproject.toml
-    with open("../../src/{{ cookiecutter.package_name }}/_version.py", "r") as f:
+    with Path("../../src/{{ cookiecutter.package_name }}/_version.py").open("r") as f:
         line = None
         while line != "":
             line = f.readline()
             if line.startswith("__version__"):
                 version = line.split()[-1]
                 break
-except IOError:
-    pass
-else:
-    version = "{{ cookiecutter.package_version }}"
 
-with open("../../pyproject.toml", "r", encoding="UTF-8") as strm:
-    defn = toml.loads(strm.read())
+
+def readtoml(*args):
+    """Look for property in pyproject.toml."""
+    entry = None
     try:
-        config = defn.get("project", {})
+        strm = Path(Path(__file__).parent, "../../pyproject.toml").open()
+        section = tomli.loads(strm.read())
+        for entry in args[:-1]:
+            section = section[entry]
     except LookupError as err:
-        raise IOError("pyproject.toml does not contain a project section") from err
+        raise LookupError(
+            f"pyproject.toml does not contain a <{entry}> section.",
+        ) from err
+    else:
+        try:
+            result = section[args[-1]]
+        except LookupError as err:
+            raise LookupError(
+                f"{entry} section does not contain a <{args[-1]}> property.",
+            ) from err
+    return result
 
-authors = [a["name"] for a in config["authors"]]
-project: str = config["name"]
+
+# GENERAL CONFIGURATION
+project: str = readtoml("project", "name")
+authors = [a["name"] for a in readtoml("project", "authors")]
 author = ", ".join(authors)
-copyright = author
-documentation_summary = config["description"]
+documentation_summary = readtoml("project", "description")
 release = version.strip("'")
 
 # SPHINX GLOBALS
@@ -154,7 +170,7 @@ html_theme_options = {
     "footer_icons": [
         {
             "name": "GitHub",
-            "url": config["urls"]["Homepage"],
+            "url": readtoml("project", "urls", "homepage"),
             "html": """
                 <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>

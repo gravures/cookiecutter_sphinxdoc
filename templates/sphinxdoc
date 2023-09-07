@@ -1,8 +1,0 @@
-{% block toml_optional_dependencies -%}
-    docs = [
-    "sphinx",
-    "sphinx-autoapi",
-    "myst-parser",
-    "furo @ git+https://github.com/gravures/furo.git@gravures",
-    ]
-{%- endblock %}

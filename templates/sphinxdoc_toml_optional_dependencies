@@ -1,0 +1,6 @@
+docs = [
+  "sphinx",
+  "sphinx-autoapi",
+  "myst-parser",
+  "furo @ git+https://github.com/gravures/furo.git@gravures",
+]
